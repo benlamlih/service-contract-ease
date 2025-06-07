@@ -1,4 +1,4 @@
-# Project my_project
+# Project Scan2Score
 
 One Paragraph of project description goes here
 

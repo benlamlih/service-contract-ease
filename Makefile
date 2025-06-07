@@ -1,6 +1,3 @@
-# Simple Makefile for a Go project
-
-# Build the application
 all: build test
 
 build:
@@ -65,8 +62,8 @@ watch:
 
 migrate-up:
 	migrate -database "postgres://$(DB_USER):$(DB_PASSWORD)@localhost:$(DB_PORT)/$(DB_NAME)?sslmode=disable" \
-		-path internal/database/migrations up
+		-path ./migrations up
 
 migrate-down:
 	migrate -database "postgres://$(DB_USER):$(DB_PASSWORD)@localhost:$(DB_PORT)/$(DB_NAME)?sslmode=disable" \
-		-path internal/database/migrations down
+		-path ./migrations down

@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"scan_to_score/internal/repository"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -21,6 +22,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	r.GET("/health", s.healthHandler)
 
+	r.GET("/students", s.getStudents)
+
 	return r
 }
 
@@ -32,5 +35,19 @@ func (s *Server) HelloWorldHandler(c *gin.Context) {
 }
 
 func (s *Server) healthHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, s.db.Health())
+	c.JSON(http.StatusOK, s.db.Health(c))
+}
+
+func (s *Server) getStudents(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	queries := repository.New(s.db.Pool())
+
+	students, err := queries.GetAllStudents(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch students"})
+		return
+	}
+
+	c.JSON(http.StatusOK, students)
 }

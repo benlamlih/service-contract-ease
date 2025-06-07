@@ -1,13 +1,14 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
-	"my_project/internal/config"
-	"my_project/internal/database"
+	"scan_to_score/internal/config"
+	"scan_to_score/internal/database"
 )
 
 type Server struct {
@@ -15,14 +16,14 @@ type Server struct {
 	db   database.Service
 }
 
-func NewServer() *http.Server {
+func NewServer(ctx context.Context) *http.Server {
 	cfg := config.LoadConfig()
 
 	port, _ := strconv.Atoi(cfg.App.Port)
 
 	s := &Server{
 		port: port,
-		db:   database.New(cfg),
+		db:   database.New(ctx, cfg),
 	}
 
 	return &http.Server{
