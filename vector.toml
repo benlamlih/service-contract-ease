@@ -1,0 +1,44 @@
+[sources.docker_logs]
+type = "docker_logs"
+docker_host = "unix:///var/run/docker.sock"
+include_containers = ["scan_to_score_app"]
+
+[transforms.parse_json]
+type = "remap"
+inputs = ["docker_logs"]
+source = '''
+. = parse_json!(string!(.message))
+# Use the timestamp from the log message
+._timestamp = del(.time)
+# Delete the duplicate timestamp field
+del(.timestamp)
+# Add log level as a separate field for better filtering
+.log_level = upcase(string!(.level))
+'''
+
+[sinks.openobserve]
+type = "http"
+inputs = ["parse_json"]
+uri = "http://openobserve:5080/api/default/default/_json"
+method = "post"
+auth.strategy = "basic"
+auth.user = "admin@example.com"
+auth.password = "supersecret"
+compression = "gzip"
+encoding.codec = "json"
+encoding.timestamp_format = "rfc3339"
+
+# Enable healthcheck with retry
+healthcheck.enabled = true
+healthcheck.uri = "http://openobserve:5080/healthz"
+healthcheck.initial_delay_secs = 10
+
+# Add request settings for better reliability
+request.retry_attempts = 10
+request.retry_initial_backoff_secs = 1
+request.retry_max_duration_secs = 60
+request.timeout_secs = 30
+
+# Add batch settings for better performance
+batch.max_events = 1000
+batch.timeout_secs = 1

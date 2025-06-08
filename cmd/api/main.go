@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"log"
@@ -58,12 +59,12 @@ func InitTracerHTTP(ctx context.Context) (*sdktrace.TracerProvider, error) {
 	// Resolve configuration (env‑vars first, fallbacks second)
 	endpoint := os.Getenv("OTEL_OTLP_HTTP_ENDPOINT")
 	if endpoint == "" {
-		endpoint = "localhost:5080"
+		endpoint = "openobserve:5080"
 	}
 
 	authHeader := os.Getenv("OO_AUTH_HEADER")
 	if authHeader == "" {
-		authHeader = "Basic YWRtaW5AZXhhbXBsZS5jb206eFRkNWhDa1FlOXRuc3BFVQ==" // admin@example.com:supersecret
+		authHeader = "Basic " + base64.StdEncoding.EncodeToString([]byte("admin@example.com:supersecret"))
 	}
 
 	org := os.Getenv("OO_ORG")
@@ -121,7 +122,11 @@ func main() {
 	}
 	defer tp.Shutdown(ctx)
 
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	// Configure structured JSON logging
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level:     slog.LevelInfo,
+		AddSource: true,
+	}))
 	slog.SetDefault(logger)
 
 	server := server.NewServer(ctx, tp)
