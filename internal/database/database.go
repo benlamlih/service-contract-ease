@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/exaring/otelpgx"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.opentelemetry.io/otel/trace"
 
 	"scan_to_score/internal/config"
 )
@@ -38,7 +40,7 @@ func (s *service) Pool() *pgxpool.Pool {
 
 var dbInstance *service
 
-func New(ctx context.Context, cfg *config.Config) Service {
+func New(ctx context.Context, cfg *config.Config, tp trace.TracerProvider) Service {
 	if dbInstance != nil {
 		return dbInstance
 	}
@@ -48,9 +50,22 @@ func New(ctx context.Context, cfg *config.Config) Service {
 		cfg.DB.User, cfg.DB.Password, cfg.DB.Host, cfg.DB.Port, cfg.DB.Name, cfg.DB.Schema,
 	)
 
-	pool, err := pgxpool.New(ctx, connStr)
+	config, err := pgxpool.ParseConfig(connStr)
+	if err != nil {
+		log.Fatalf("Failed to parse connection string: %v", err)
+	}
+
+	// Add OpenTelemetry tracing
+	config.ConnConfig.Tracer = otelpgx.NewTracer()
+
+	pool, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		log.Fatalf("Failed to connect to DB: %v", err)
+	}
+
+	// Record database stats
+	if err := otelpgx.RecordStats(pool); err != nil {
+		log.Fatalf("Failed to record database stats: %v", err)
 	}
 
 	dbInstance = &service{pool: pool}

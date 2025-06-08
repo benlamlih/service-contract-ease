@@ -4,12 +4,16 @@ import (
 	"net/http"
 	"scan_to_score/internal/repository"
 
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-func (s *Server) RegisterRoutes() http.Handler {
+func (s *Server) RegisterRoutes(tp trace.TracerProvider) http.Handler {
 	r := gin.Default()
+	r.Use(otelgin.Middleware("scan_to_score", otelgin.WithTracerProvider(tp)))
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},

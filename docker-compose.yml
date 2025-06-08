@@ -11,6 +11,17 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
+  openobserve:
+    image: public.ecr.aws/zinclabs/openobserve:latest
+    container_name: openobserve
+    restart: unless-stopped
+    ports:
+      - "5080:5080"      # UI + HTTP/OTLP/Logs
+      - "4317:4317"      # OTLP gRPC (traces, metrics, logs)
+    environment:
+      ZO_ROOT_USER_EMAIL: admin@example.com
+      ZO_ROOT_USER_PASSWORD: supersecret
+      ZO_OTLP_HTTP_ENABLE: "true"    # ← enable OTLP over HTTP
+      ZO_OTLP_GRPC_ENABLE: "true"    # ← optional: enable OTLP-gRPC too
 volumes:
   postgres_data:

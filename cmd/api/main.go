@@ -12,6 +12,14 @@ import (
 	"syscall"
 	"time"
 
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+
 	"scan_to_score/internal/server"
 )
 
@@ -40,11 +48,83 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 	done <- true
 }
 
+func InitTracerHTTP(ctx context.Context) (*sdktrace.TracerProvider, error) {
+	// Propagation (so downstream services can read our trace headers)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	))
+
+	// Resolve configuration (env‑vars first, fallbacks second)
+	endpoint := os.Getenv("OTEL_OTLP_HTTP_ENDPOINT")
+	if endpoint == "" {
+		endpoint = "localhost:5080"
+	}
+
+	authHeader := os.Getenv("OO_AUTH_HEADER")
+	if authHeader == "" {
+		authHeader = "Basic YWRtaW5AZXhhbXBsZS5jb206eFRkNWhDa1FlOXRuc3BFVQ==" // admin@example.com:supersecret
+	}
+
+	org := os.Getenv("OO_ORG")
+	if org == "" {
+		org = "default"
+	}
+
+	stream := os.Getenv("OO_STREAM")
+	if stream == "" {
+		stream = "scan_to_score"
+	}
+
+	exporter, err := otlptracehttp.New(ctx,
+		otlptracehttp.WithEndpoint(endpoint),
+		otlptracehttp.WithURLPath(fmt.Sprintf("/api/%s/v1/traces", org)),
+		otlptracehttp.WithInsecure(), // use http instead of https for local dev
+		otlptracehttp.WithHeaders(map[string]string{
+			"authorization": authHeader,
+			"organization":  org,
+			"stream-name":   stream,
+		}),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("create otlp exporter: %w", err)
+	}
+
+	// Attach resource attributes (visible in OpenObserve UI)
+	res, _ := resource.Merge(
+		resource.Default(),
+		resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceNameKey.String("scan_to_score"),
+			semconv.ServiceVersionKey.String("0.0.1"),
+			attribute.String("environment", "local"),
+			attribute.String("service_name", "scan_to_score"),
+		),
+	)
+
+	// Create and register TracerProvider
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithResource(res),
+	)
+
+	otel.SetTracerProvider(tp)
+	return tp, nil
+}
+
 func main() {
+	ctx := context.Background()
+	tp, err := InitTracerHTTP(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer tp.Shutdown(ctx)
+
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
-	ctx := context.Background()
-	server := server.NewServer(ctx)
+
+	server := server.NewServer(ctx, tp)
 
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool, 1)
@@ -53,8 +133,7 @@ func main() {
 	go gracefulShutdown(server, done)
 
 	slog.Info("Listening on HTTP server", "addr", server.Addr)
-	err := server.ListenAndServe()
-	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+	if err = server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		panic(fmt.Sprintf("http server error: %s", err))
 	}
 
