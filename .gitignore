@@ -169,4 +169,7 @@ tags
 # Persistent undo
 [._]*.un~
 
+# OpenAPI build files
+docs/build/
+
 # End of https://www.toptal.com/developers/gitignore/api/go,intellij+all,macos,vim

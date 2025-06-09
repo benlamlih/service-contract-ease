@@ -1,0 +1,31 @@
+get:
+  summary: Health Check
+  # tags:
+  #   - health
+  description: Check the health status of the API and database
+  operationId: healthCheck
+  security:
+    - bearerAuth: []
+  responses:
+    '200':
+      description: System is healthy
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: ok
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '../openapi.yaml#/components/schemas/Error'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '../openapi.yaml#/components/schemas/Error' 

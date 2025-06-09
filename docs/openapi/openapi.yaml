@@ -1,0 +1,49 @@
+openapi: 3.0.0
+info:
+  title: Scan2Score API
+  version: 1.0.0
+  description: API documentation for the Scan2Score service
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api.scan2score.com
+    description: Production server
+
+security:
+  - bearerAuth: []
+
+paths:
+  /:
+    $ref: './paths/root.yaml'
+  /health:
+    $ref: './paths/health.yaml'
+  /students:
+    $ref: './paths/students.yaml'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Student:
+      $ref: './components/schemas/Student.yaml'
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Error message
+
+# tags:
+#   - name: General
+#     description: General endpoints
+#   - name: Health
+#     description: Health endpoints
+#   - name: Students
+#     description: Operations about students 

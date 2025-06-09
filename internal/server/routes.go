@@ -7,6 +7,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.opentelemetry.io/otel/trace"
 
+	scalar "github.com/MarceloPetrucio/go-scalar-api-reference"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -27,6 +28,8 @@ func (s *Server) RegisterRoutes(tp trace.TracerProvider) http.Handler {
 	r.GET("/health", s.healthHandler)
 
 	r.GET("/students", s.getStudents)
+
+	r.GET("/reference", s.apiReferenceHandler)
 
 	return r
 }
@@ -54,4 +57,21 @@ func (s *Server) getStudents(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, students)
+}
+
+func (s *Server) apiReferenceHandler(c *gin.Context) {
+	htmlContent, err := scalar.ApiReferenceHTML(&scalar.Options{
+		SpecURL: "./docs/build/openapi.yaml",
+		CustomOptions: scalar.CustomOptions{
+			PageTitle: "Scan2Score API",
+		},
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate API documentation"})
+		return
+	}
+
+	c.Header("Content-Type", "text/html")
+	c.String(http.StatusOK, htmlContent)
 }

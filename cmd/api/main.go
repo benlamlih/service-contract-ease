@@ -59,7 +59,8 @@ func InitTracerHTTP(ctx context.Context) (*sdktrace.TracerProvider, error) {
 	// Resolve configuration (env‑vars first, fallbacks second)
 	endpoint := os.Getenv("OTEL_OTLP_HTTP_ENDPOINT")
 	if endpoint == "" {
-		endpoint = "openobserve:5080"
+		endpoint = "localhost:5080"
+		//endpoint = "openobserve:5080"
 	}
 
 	authHeader := os.Getenv("OO_AUTH_HEADER")

@@ -5,6 +5,7 @@ db:
   user: "postgres"
   password: "postgres"
   name: "scan_to_score"
-  host: "postgres"
+  host: "localhost"
+  # host: "postgres"
   port: "5432"
   schema: "public"
