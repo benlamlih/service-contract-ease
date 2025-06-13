@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: .
-    container_name: scan_to_score_app
+    container_name: service_contract_ease
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -23,7 +23,7 @@ services:
         max-file: "3"
   postgres:
     image: postgres:17-alpine
-    container_name: scan_to_score_postgres
+    container_name: contract_ease_postgres
     restart: unless-stopped
     ports:
       - "${DB_PORT:-5432}:5432"

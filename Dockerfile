@@ -19,7 +19,7 @@ WORKDIR /app
 # Copy the binary from the builder
 COPY --from=builder /app/main .
 # Copy the config file
-COPY config.yaml .
+COPY config.prod.yaml .
 
 # Expose port if your server listens on one (optional)
 EXPOSE 8080

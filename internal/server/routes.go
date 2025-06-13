@@ -2,22 +2,26 @@ package server
 
 import (
 	"net/http"
-	"scan_to_score/internal/repository"
-
-	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
-	"go.opentelemetry.io/otel/trace"
 
 	scalar "github.com/MarceloPetrucio/go-scalar-api-reference"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"go.opentelemetry.io/otel/trace"
+
+	"scan_to_score/internal/config"
 )
 
 func (s *Server) RegisterRoutes(tp trace.TracerProvider) http.Handler {
+
 	r := gin.Default()
 	r.Use(otelgin.Middleware("scan_to_score", otelgin.WithTracerProvider(tp)))
 
+	cfg := config.LoadConfig()
+	frontendURL := cfg.App.FrontendURL
+
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowOrigins:     []string{frontendURL},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true,
@@ -26,8 +30,6 @@ func (s *Server) RegisterRoutes(tp trace.TracerProvider) http.Handler {
 	r.GET("/", s.HelloWorldHandler)
 
 	r.GET("/health", s.healthHandler)
-
-	r.GET("/students", s.getStudents)
 
 	r.GET("/reference", s.apiReferenceHandler)
 
@@ -43,20 +45,6 @@ func (s *Server) HelloWorldHandler(c *gin.Context) {
 
 func (s *Server) healthHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, s.db.Health(c))
-}
-
-func (s *Server) getStudents(c *gin.Context) {
-	ctx := c.Request.Context()
-
-	queries := repository.New(s.db.Pool())
-
-	students, err := queries.GetAllStudents(ctx)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch students"})
-		return
-	}
-
-	c.JSON(http.StatusOK, students)
 }
 
 func (s *Server) apiReferenceHandler(c *gin.Context) {

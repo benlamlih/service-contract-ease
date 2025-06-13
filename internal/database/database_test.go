@@ -29,7 +29,7 @@ func mustStartPostgresContainer() (func(context.Context, ...testcontainers.Termi
 
 	container, err := postgres.Run(
 		context.Background(),
-		"postgres:15-alpine",
+		"postgres:17-alpine",
 		postgres.WithDatabase(dbName),
 		postgres.WithUsername(dbUser),
 		postgres.WithPassword(dbPass),

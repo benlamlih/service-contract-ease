@@ -13,20 +13,18 @@ sql:
         sql_package: "pgx/v5"
 
         overrides:
-          # ─────────────── UUID ───────────────
-          - db_type: "uuid"                     # NOT NULL
+          - db_type: "uuid"
             go_type:
               import: "github.com/google/uuid"
               type:   "UUID"
 
-          - db_type: "uuid"                     # NULLABLE  → *uuid.UUID
+          - db_type: "uuid"
             nullable: true
             go_type:
               import:  "github.com/google/uuid"
               type:    "UUID"
               pointer: true
 
-          # ─── TIMESTAMP WITHOUT TZ ───
           - db_type: "pg_catalog.timestamp"
             go_type:
               import: "time"
@@ -38,7 +36,6 @@ sql:
               type:    "Time"
               pointer: true
 
-          # ─── TIMESTAMP WITH TZ ───
           - db_type: "pg_catalog.timestamptz"
             go_type:
               import: "time"
@@ -50,7 +47,6 @@ sql:
               type:    "Time"
               pointer: true
 
-          # ─────── DATE ───────
           - db_type: "date"
             go_type:
               import: "time"
@@ -62,7 +58,6 @@ sql:
               type:    "Time"
               pointer: true
 
-          # ─────────────── TEXT ───────────────
           - db_type: "text"
             go_type:
               type: "string"

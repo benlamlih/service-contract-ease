@@ -1,11 +1,12 @@
 app:
   port: "8080"
+  frontend_url: "http://client-contract-ease:5173"
+  otel_endpoint: "http://openobserve:5080"
 
 db:
-  user: "postgres"
-  password: "postgres"
+  user: ${DB_USER}
+  password: ${DB_PASSWORD}
   name: "scan_to_score"
-  host: "localhost"
-  # host: "postgres"
+  host: "postgres"
   port: "5432"
   schema: "public"

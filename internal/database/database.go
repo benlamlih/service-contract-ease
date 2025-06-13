@@ -7,8 +7,6 @@ import (
 
 	"github.com/exaring/otelpgx"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"go.opentelemetry.io/otel/trace"
-
 	"scan_to_score/internal/config"
 )
 
@@ -40,7 +38,7 @@ func (s *service) Pool() *pgxpool.Pool {
 
 var dbInstance *service
 
-func New(ctx context.Context, cfg *config.Config, tp trace.TracerProvider) Service {
+func New(ctx context.Context, cfg *config.Config) Service {
 	if dbInstance != nil {
 		return dbInstance
 	}

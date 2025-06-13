@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"os"
 	"strings"
 
 	"github.com/knadh/koanf/parsers/yaml"
@@ -12,7 +13,9 @@ import (
 
 type Config struct {
 	App struct {
-		Port string `koanf:"port"`
+		Port         string `koanf:"port"`
+		FrontendURL  string `koanf:"frontend_url"`
+		OtelEndpoint string `koanf:"otel_endpoint"`
 	} `koanf:"app"`
 
 	DB struct {
@@ -28,12 +31,16 @@ type Config struct {
 var k = koanf.New(".")
 
 func LoadConfig() *Config {
-	// 1. Load from config.yaml
-	if err := k.Load(file.Provider("config.yaml"), yaml.Parser()); err != nil {
-		log.Fatalf("error loading config.yaml: %v", err)
+	envFile := "dev"
+	if val := os.Getenv("APP_ENV"); val != "" {
+		envFile = val
 	}
 
-	// 2. Override with ENV vars, e.g. APP_PORT, DB_USER
+	configFile := "config." + envFile + ".yaml"
+	if err := k.Load(file.Provider(configFile), yaml.Parser()); err != nil {
+		log.Fatalf("error loading config.dev.yaml: %v", err)
+	}
+
 	if err := k.Load(env.Provider("", ".", func(s string) string {
 		return strings.ToLower(strings.ReplaceAll(s, "_", "."))
 	}), nil); err != nil {

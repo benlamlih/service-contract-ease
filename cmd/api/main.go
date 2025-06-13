@@ -5,11 +5,13 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/joho/godotenv"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
+	"scan_to_score/internal/config"
 	"syscall"
 	"time"
 
@@ -56,11 +58,12 @@ func InitTracerHTTP(ctx context.Context) (*sdktrace.TracerProvider, error) {
 		propagation.Baggage{},
 	))
 
-	// Resolve configuration (env‑vars first, fallbacks second)
+	cfg := config.LoadConfig()
+	OtelEndpoint := cfg.App.OtelEndpoint
+
 	endpoint := os.Getenv("OTEL_OTLP_HTTP_ENDPOINT")
 	if endpoint == "" {
-		endpoint = "localhost:5080"
-		//endpoint = "openobserve:5080"
+		endpoint = OtelEndpoint
 	}
 
 	authHeader := os.Getenv("OO_AUTH_HEADER")
@@ -81,6 +84,7 @@ func InitTracerHTTP(ctx context.Context) (*sdktrace.TracerProvider, error) {
 	exporter, err := otlptracehttp.New(ctx,
 		otlptracehttp.WithEndpoint(endpoint),
 		otlptracehttp.WithURLPath(fmt.Sprintf("/api/%s/v1/traces", org)),
+		// TODO: Use https in production
 		otlptracehttp.WithInsecure(), // use http instead of https for local dev
 		otlptracehttp.WithHeaders(map[string]string{
 			"authorization": authHeader,
@@ -117,6 +121,12 @@ func InitTracerHTTP(ctx context.Context) (*sdktrace.TracerProvider, error) {
 
 func main() {
 	ctx := context.Background()
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("No .env file found, continuing...")
+	}
+
 	tp, err := InitTracerHTTP(ctx)
 	if err != nil {
 		log.Fatal(err)

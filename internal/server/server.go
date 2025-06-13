@@ -24,7 +24,7 @@ func NewServer(ctx context.Context, tp trace.TracerProvider) *http.Server {
 
 	s := &Server{
 		port: port,
-		db:   database.New(ctx, cfg, tp),
+		db:   database.New(ctx, cfg),
 	}
 
 	return &http.Server{
