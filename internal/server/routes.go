@@ -53,6 +53,9 @@ func (s *Server) apiReferenceHandler(c *gin.Context) {
 		CustomOptions: scalar.CustomOptions{
 			PageTitle: "ContractEase API",
 		},
+		Theme:    "deepSpace",
+		Layout:   "modern",
+		DarkMode: true,
 	})
 
 	if err != nil {

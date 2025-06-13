@@ -1,0 +1,23 @@
+get:
+  summary: Get Current User
+  description: Returns the current authenticated user from the JWT
+  operationId: getCurrentUser
+  security:
+    - bearerAuth: []
+  responses:
+    '200':
+      description: Successfully retrieved user information
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/User.yaml'
+    '401':
+      description: Unauthorized - Invalid or missing token
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Unauthorized" 

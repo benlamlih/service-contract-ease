@@ -1,0 +1,16 @@
+type: object
+required:
+  - message
+properties:
+  message:
+    type: string
+    description: Error message describing what went wrong
+    example: "Unauthorized access"
+  code:
+    type: string
+    description: Error code for the specific error type
+    example: "UNAUTHORIZED"
+  details:
+    type: object
+    description: Additional error details if available
+    additionalProperties: true 

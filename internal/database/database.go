@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/url"
 
 	"github.com/exaring/otelpgx"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -44,9 +45,13 @@ func New(ctx context.Context, cfg *config.Config) Service {
 		return dbInstance
 	}
 
+	// URL encode credentials to handle special characters
+	user := url.QueryEscape(cfg.DB.User)
+	password := url.QueryEscape(cfg.DB.Password)
+
 	connStr := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s",
-		cfg.DB.User, cfg.DB.Password, cfg.DB.Host, cfg.DB.Port, cfg.DB.Name, cfg.DB.Schema,
+		user, password, cfg.DB.Host, cfg.DB.Port, cfg.DB.Name, cfg.DB.Schema,
 	)
 
 	config, err := pgxpool.ParseConfig(connStr)

@@ -22,10 +22,10 @@ get:
       content:
         application/json:
           schema:
-            $ref: '../openapi.yaml#/components/schemas/Error'
+            $ref: '../schemas/Error.yaml'
     '403':
       description: Forbidden
       content:
         application/json:
           schema:
-            $ref: '../openapi.yaml#/components/schemas/Error' 
+            $ref: '../schemas/Error.yaml' 
