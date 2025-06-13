@@ -1,4 +1,4 @@
-module scan_to_score
+module contract_ease
 
 go 1.24.2
 

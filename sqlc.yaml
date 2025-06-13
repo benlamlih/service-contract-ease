@@ -16,46 +16,46 @@ sql:
           - db_type: "uuid"
             go_type:
               import: "github.com/google/uuid"
-              type:   "UUID"
+              type: "UUID"
 
           - db_type: "uuid"
             nullable: true
             go_type:
-              import:  "github.com/google/uuid"
-              type:    "UUID"
+              import: "github.com/google/uuid"
+              type: "UUID"
               pointer: true
 
           - db_type: "pg_catalog.timestamp"
             go_type:
               import: "time"
-              type:   "Time"
+              type: "Time"
           - db_type: "pg_catalog.timestamp"
             nullable: true
             go_type:
-              import:  "time"
-              type:    "Time"
+              import: "time"
+              type: "Time"
               pointer: true
 
           - db_type: "pg_catalog.timestamptz"
             go_type:
               import: "time"
-              type:   "Time"
+              type: "Time"
           - db_type: "pg_catalog.timestamptz"
             nullable: true
             go_type:
-              import:  "time"
-              type:    "Time"
+              import: "time"
+              type: "Time"
               pointer: true
 
           - db_type: "date"
             go_type:
               import: "time"
-              type:   "Time"
+              type: "Time"
           - db_type: "date"
             nullable: true
             go_type:
-              import:  "time"
-              type:    "Time"
+              import: "time"
+              type: "Time"
               pointer: true
 
           - db_type: "text"
@@ -65,5 +65,15 @@ sql:
           - db_type: "text"
             nullable: true
             go_type:
-              type:    "string"
+              type: "string"
+              pointer: true
+
+          - db_type: "citext"
+            go_type:
+              type: "string"
+
+          - db_type: "citext"
+            nullable: true
+            go_type:
+              type: "string"
               pointer: true

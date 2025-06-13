@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	"scan_to_score/internal/config"
-	"scan_to_score/internal/database"
+	"contract_ease/internal/config"
+	"contract_ease/internal/database"
 )
 
 type Server struct {

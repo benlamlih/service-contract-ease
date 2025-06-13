@@ -1,7 +1,7 @@
 [sources.docker_logs]
 type = "docker_logs"
 docker_host = "unix:///var/run/docker.sock"
-include_containers = ["scan_to_score_app"]
+include_containers = ["service_contract_ease"]
 
 [transforms.parse_json]
 type = "remap"

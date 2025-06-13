@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"scan_to_score/internal/config"
 	"syscall"
 	"time"
 
@@ -23,7 +22,8 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 
-	"scan_to_score/internal/server"
+	"contract_ease/internal/config"
+	"contract_ease/internal/server"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {
@@ -78,7 +78,7 @@ func InitTracerHTTP(ctx context.Context) (*sdktrace.TracerProvider, error) {
 
 	stream := os.Getenv("OO_STREAM")
 	if stream == "" {
-		stream = "scan_to_score"
+		stream = "contract_ease"
 	}
 
 	exporter, err := otlptracehttp.New(ctx,
@@ -101,10 +101,10 @@ func InitTracerHTTP(ctx context.Context) (*sdktrace.TracerProvider, error) {
 		resource.Default(),
 		resource.NewWithAttributes(
 			semconv.SchemaURL,
-			semconv.ServiceNameKey.String("scan_to_score"),
+			semconv.ServiceNameKey.String("contract_ease"),
 			semconv.ServiceVersionKey.String("0.0.1"),
 			attribute.String("environment", "local"),
-			attribute.String("service_name", "scan_to_score"),
+			attribute.String("service_name", "contract_ease"),
 		),
 	)
 

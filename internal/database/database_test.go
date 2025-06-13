@@ -11,8 +11,8 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 
-	"scan_to_score/internal/config"
-	"scan_to_score/internal/database"
+	"contract_ease/internal/config"
+	"contract_ease/internal/database"
 )
 
 var (

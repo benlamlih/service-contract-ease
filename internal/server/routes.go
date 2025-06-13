@@ -9,13 +9,13 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.opentelemetry.io/otel/trace"
 
-	"scan_to_score/internal/config"
+	"contract_ease/internal/config"
 )
 
 func (s *Server) RegisterRoutes(tp trace.TracerProvider) http.Handler {
 
 	r := gin.Default()
-	r.Use(otelgin.Middleware("scan_to_score", otelgin.WithTracerProvider(tp)))
+	r.Use(otelgin.Middleware("contract_ease", otelgin.WithTracerProvider(tp)))
 
 	cfg := config.LoadConfig()
 	frontendURL := cfg.App.FrontendURL
@@ -51,7 +51,7 @@ func (s *Server) apiReferenceHandler(c *gin.Context) {
 	htmlContent, err := scalar.ApiReferenceHTML(&scalar.Options{
 		SpecURL: "./docs/build/openapi.yaml",
 		CustomOptions: scalar.CustomOptions{
-			PageTitle: "Scan2Score API",
+			PageTitle: "ContractEase API",
 		},
 	})
 

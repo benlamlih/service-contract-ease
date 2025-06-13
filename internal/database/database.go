@@ -7,7 +7,8 @@ import (
 
 	"github.com/exaring/otelpgx"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"scan_to_score/internal/config"
+
+	"contract_ease/internal/config"
 )
 
 type Service interface {

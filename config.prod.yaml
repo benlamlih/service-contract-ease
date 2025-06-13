@@ -6,7 +6,7 @@ app:
 db:
   user: ${DB_USER}
   password: ${DB_PASSWORD}
-  name: "scan_to_score"
+  name: ${DB_NAME}
+  port: ${DB_PORT}
   host: "postgres"
-  port: "5432"
   schema: "public"

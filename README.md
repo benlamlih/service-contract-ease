@@ -1,4 +1,4 @@
-# Project Scan2Score
+# Project ContractEase
 
 One Paragraph of project description goes here
 
