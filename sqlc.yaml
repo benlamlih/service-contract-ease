@@ -68,11 +68,11 @@ sql:
               type: "string"
               pointer: true
 
-          - db_type: "citext"
+          - db_type: "pg_catalog.citext"
             go_type:
               type: "string"
 
-          - db_type: "citext"
+          - db_type: "pg_catalog.citext"
             nullable: true
             go_type:
               type: "string"

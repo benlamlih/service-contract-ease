@@ -25,14 +25,15 @@ CREATE TABLE workspace_members
 (
     user_id      UUID REFERENCES users (id) ON DELETE CASCADE,
     workspace_id UUID REFERENCES workspaces (id) ON DELETE CASCADE,
-    role         TEXT CHECK (role IN ('owner', 'member')) NOT NULL,
+    role         SMALLINT CHECK (role BETWEEN 0 AND 1) NOT NULL,
     PRIMARY KEY (user_id, workspace_id)
 );
 
 -- Enforce only one owner per workspace
 CREATE UNIQUE INDEX one_owner_per_workspace
     ON workspace_members (workspace_id)
-    WHERE role = 'owner';
+    -- 0 == RoleOwner
+    WHERE role = 0;
 
 -- Clients
 CREATE TABLE clients
@@ -50,11 +51,11 @@ CREATE TABLE contracts
 (
     id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     workspace_id   UUID REFERENCES workspaces (id) ON DELETE CASCADE,
-    client_id      UUID                                               REFERENCES clients (id) ON DELETE SET NULL,
-    created_by     UUID                                               REFERENCES users (id) ON DELETE SET NULL,
-    title          TEXT                                               NOT NULL,
+    client_id      UUID                                    REFERENCES clients (id) ON DELETE SET NULL,
+    created_by     UUID                                    REFERENCES users (id) ON DELETE SET NULL,
+    title          TEXT                                    NOT NULL,
     content        TEXT,
-    status         TEXT CHECK (status IN ('draft', 'sent', 'signed')) NOT NULL,
+    status         SMALLINT CHECK (status BETWEEN 0 AND 2) NOT NULL,
     version        INT              DEFAULT 1,
     sent_at        TIMESTAMPTZ,
     draft_pdf_url  TEXT,
@@ -67,12 +68,12 @@ CREATE TABLE contracts
 -- Signing links
 CREATE TABLE contract_signing_links
 (
-    id          UUID PRIMARY KEY                                    DEFAULT gen_random_uuid(),
+    id          UUID PRIMARY KEY                                 DEFAULT gen_random_uuid(),
     contract_id UUID REFERENCES contracts (id) ON DELETE CASCADE,
     client_id   UUID REFERENCES clients (id) ON DELETE CASCADE,
-    token       TEXT UNIQUE NOT NULL,
-    status      TEXT CHECK (status IN ('sent', 'opened', 'signed')) DEFAULT 'sent',
-    created_at  TIMESTAMPTZ                                         DEFAULT now(),
+    token       TEXT UNIQUE                             NOT NULL,
+    status      SMALLINT CHECK (status BETWEEN 0 AND 2) NOT NULL DEFAULT 0,
+    created_at  TIMESTAMPTZ                                      DEFAULT now(),
     expires_at  TIMESTAMPTZ,
     opened_at   TIMESTAMPTZ,
     signed_at   TIMESTAMPTZ
@@ -89,13 +90,18 @@ CREATE TABLE signatures
     signed_at      TIMESTAMPTZ,
     ip_address     TEXT CHECK (length(ip_address) <= 45),
     user_agent     TEXT,
-    method         TEXT CHECK (method IN ('typed', 'drawn')),
+    method         SMALLINT CHECK (method BETWEEN 0 AND 1),
     signature_data TEXT,
     consent        BOOLEAN NOT NULL DEFAULT true
 );
 
--- Indexes for performance
+-- Indexes
 CREATE INDEX idx_contracts_workspace ON contracts (workspace_id);
 CREATE INDEX idx_contracts_status ON contracts (status);
 CREATE INDEX idx_links_token ON contract_signing_links (token);
 CREATE INDEX idx_contracts_client ON contracts (client_id);
+CREATE INDEX idx_workspace_members_user ON workspace_members (user_id);
+CREATE INDEX idx_workspace_members_workspace ON workspace_members (workspace_id);
+CREATE INDEX idx_signatures_contract ON signatures (contract_id);
+CREATE INDEX idx_signatures_client ON signatures (client_id);
+CREATE INDEX idx_contracts_active ON contracts (workspace_id) WHERE deleted_at IS NULL;

@@ -1,3 +1,6 @@
+include .env
+export
+
 all: build test
 
 build: build-openapi
