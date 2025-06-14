@@ -38,13 +38,7 @@ func (s *service) Pool() *pgxpool.Pool {
 	return s.pool
 }
 
-var dbInstance *service
-
 func New(ctx context.Context, cfg *config.Config) Service {
-	if dbInstance != nil {
-		return dbInstance
-	}
-
 	// URL encode credentials to handle special characters
 	user := url.QueryEscape(cfg.DB.User)
 	password := url.QueryEscape(cfg.DB.Password)
@@ -72,6 +66,5 @@ func New(ctx context.Context, cfg *config.Config) Service {
 		log.Fatalf("Failed to record database stats: %v", err)
 	}
 
-	dbInstance = &service{pool: pool}
-	return dbInstance
+	return &service{pool: pool}
 }

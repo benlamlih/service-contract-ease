@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"os"
-	"sync"
 	"testing"
 	"time"
 
@@ -20,7 +19,6 @@ var (
 	ctx        context.Context
 	container  testcontainers.Container
 	testConfig *config.Config
-	mu         sync.Mutex // Mutex to protect dbInstance access
 )
 
 func TestMain(m *testing.M) {
@@ -73,53 +71,30 @@ func TestMain(m *testing.M) {
 
 func TestHealth(t *testing.T) {
 	t.Parallel()
-	mu.Lock()
-	dbInstance = nil
-	mu.Unlock()
 
 	srv := New(ctx, testConfig)
-	defer func() {
-		srv.Close()
-		mu.Lock()
-		dbInstance = nil
-		mu.Unlock()
-	}()
+	defer srv.Close()
 
 	health := srv.Health(ctx)
-	assert.Equal(t, "up", health["status"], "Expected health status to be 'up'")
+	assert.Equal(t, "up", health["status"])
 }
 
 func TestClose(t *testing.T) {
 	t.Parallel()
-	mu.Lock()
-	dbInstance = nil
-	mu.Unlock()
 
 	srv := New(ctx, testConfig)
 	srv.Close()
-
-	mu.Lock()
-	dbInstance = nil
-	mu.Unlock()
 }
 
 func TestPool(t *testing.T) {
 	t.Parallel()
-	mu.Lock()
-	dbInstance = nil
-	mu.Unlock()
 
 	srv := New(ctx, testConfig)
-	defer func() {
-		srv.Close()
-		mu.Lock()
-		dbInstance = nil
-		mu.Unlock()
-	}()
+	defer srv.Close()
 
 	pool := srv.Pool()
-	assert.NotNil(t, pool, "Expected pool to not be nil")
+	assert.NotNil(t, pool)
 
 	err := pool.Ping(ctx)
-	assert.NoError(t, err, "Expected pool to be able to ping database")
+	assert.NoError(t, err)
 }
