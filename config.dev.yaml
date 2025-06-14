@@ -10,3 +10,9 @@ db:
   port: ${DB_PORT}
   host: "localhost"
   schema: "public"
+
+zitadel:
+  issuer: ${ZITADEL_ISSUER_URL}
+  client_id: ${ZITADEL_CLIENT_ID}
+  client_secret: ${ZITADEL_CLIENT_SECRET}
+  pat: ${ZITADEL_SERVICE_PAT}

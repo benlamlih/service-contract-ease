@@ -6,8 +6,11 @@ CREATE EXTENSION IF NOT EXISTS "citext";
 CREATE TABLE users
 (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    zitadel_id TEXT UNIQUE   NOT NULL,
+    first_name TEXT,
+    last_name  TEXT,
+    username   TEXT,
     email      CITEXT UNIQUE NOT NULL,
-    name       TEXT,
     created_at TIMESTAMPTZ      DEFAULT now()
 );
 
