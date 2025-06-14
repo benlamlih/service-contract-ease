@@ -30,10 +30,38 @@ security:
   - bearerAuth: []
 
 paths:
-  /:
-    $ref: './paths/root.yaml'
-  /health:
+  /api/health:
     $ref: './paths/health.yaml'
-  /me:
+  /api/docs:
+    get:
+      summary: API Documentation
+      description: Returns the API documentation UI
+      operationId: getApiDocs
+      responses:
+        '200':
+          description: Successfully returned API documentation
+          content:
+            text/html:
+              schema:
+                type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/Error.yaml'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/Error.yaml'
+        '404':
+          description: Documentation not found
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/Error.yaml'
+  /api/me:
     $ref: './paths/me.yaml'
 
