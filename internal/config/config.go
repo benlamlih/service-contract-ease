@@ -28,6 +28,13 @@ type Config struct {
 		Port     string `koanf:"port"`
 		Schema   string `koanf:"schema"`
 	} `koanf:"db"`
+
+	Zitadel struct {
+		Issuer       string `koanf:"issuer"`
+		ClientID     string `koanf:"client_id"`
+		ClientSecret string `koanf:"client_secret"`
+		PAT          string `koanf:"pat"`
+	} `koanf:"zitadel"`
 }
 
 var k = koanf.New(".")
