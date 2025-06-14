@@ -1,106 +1,125 @@
-package database_test
+package database
 
 import (
 	"context"
 	"log"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 
 	"contract_ease/internal/config"
-	"contract_ease/internal/database"
 )
 
 var (
-	cfg *config.Config
-	ctx context.Context
+	ctx        context.Context
+	container  testcontainers.Container
+	testConfig *config.Config
+	mu         sync.Mutex // Mutex to protect dbInstance access
 )
-
-func mustStartPostgresContainer() (func(context.Context, ...testcontainers.TerminateOption) error, error) {
-	const (
-		dbName = "test_db"
-		dbUser = "test_user"
-		dbPass = "test_pass"
-	)
-
-	container, err := postgres.Run(
-		context.Background(),
-		"postgres:17-alpine",
-		postgres.WithDatabase(dbName),
-		postgres.WithUsername(dbUser),
-		postgres.WithPassword(dbPass),
-		testcontainers.WithWaitStrategy(
-			wait.ForLog("database system is ready to accept connections").
-				WithStartupTimeout(20*time.Second),
-		),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	host, err := container.Host(context.Background())
-	if err != nil {
-		return container.Terminate, err
-	}
-
-	port, err := container.MappedPort(context.Background(), "5432/tcp")
-	if err != nil {
-		return container.Terminate, err
-	}
-
-	cfg = &config.Config{}
-	cfg.DB.Name = dbName
-	cfg.DB.User = dbUser
-	cfg.DB.Password = dbPass
-	cfg.DB.Host = host
-	cfg.DB.Port = port.Port()
-	cfg.DB.Schema = "public"
-	cfg.App.Port = "8080"
-
-	return container.Terminate, nil
-}
 
 func TestMain(m *testing.M) {
 	ctx = context.Background()
+	var err error
 
-	teardown, err := mustStartPostgresContainer()
+	container, err = postgres.Run(ctx,
+		"postgres:16-alpine",
+		postgres.WithDatabase("test_db"),
+		postgres.WithUsername("test_user"),
+		postgres.WithPassword("test_pass"),
+		testcontainers.WithWaitStrategy(
+			wait.ForAll(
+				wait.ForLog("database system is ready to accept connections").WithOccurrence(2),
+				wait.ForListeningPort("5432/tcp"),
+			).WithDeadline(time.Second*30),
+		),
+	)
 	if err != nil {
-		log.Fatalf("could not start postgres container: %v", err)
+		log.Fatalf("Failed to start container: %v", err)
 	}
+
+	host, err := container.Host(ctx)
+	if err != nil {
+		log.Fatalf("Failed to get container host: %v", err)
+	}
+
+	mappedPort, err := container.MappedPort(ctx, "5432")
+	if err != nil {
+		log.Fatalf("Failed to get container port: %v", err)
+	}
+
+	// Setup test config
+	testConfig = &config.Config{}
+	testConfig.DB.Name = "test_db"
+	testConfig.DB.User = "test_user"
+	testConfig.DB.Password = "test_pass"
+	testConfig.DB.Host = host
+	testConfig.DB.Port = mappedPort.Port()
+	testConfig.DB.Schema = "public"
 
 	code := m.Run()
 
-	if teardown != nil {
-		_ = teardown(ctx)
+	if err := container.Terminate(ctx); err != nil {
+		log.Printf("Failed to terminate container: %v", err)
 	}
 
 	os.Exit(code)
 }
 
-func TestNew(t *testing.T) {
-	srv := database.New(ctx, cfg)
-	if srv == nil {
-		t.Fatal("New() returned nil")
-	}
-}
-
 func TestHealth(t *testing.T) {
-	srv := database.New(ctx, cfg)
+	t.Parallel()
+	mu.Lock()
+	dbInstance = nil
+	mu.Unlock()
 
-	stats := srv.Health(ctx)
+	srv := New(ctx, testConfig)
+	defer func() {
+		srv.Close()
+		mu.Lock()
+		dbInstance = nil
+		mu.Unlock()
+	}()
 
-	if stats["status"] != "up" {
-		t.Fatalf("expected status to be up, got %s", stats["status"])
-	}
+	health := srv.Health(ctx)
+	assert.Equal(t, "up", health["status"], "Expected health status to be 'up'")
 }
 
 func TestClose(t *testing.T) {
-	srv := database.New(ctx, cfg)
+	t.Parallel()
+	mu.Lock()
+	dbInstance = nil
+	mu.Unlock()
 
-	// should not panic or return error
+	srv := New(ctx, testConfig)
 	srv.Close()
+
+	mu.Lock()
+	dbInstance = nil
+	mu.Unlock()
+}
+
+func TestPool(t *testing.T) {
+	t.Parallel()
+	mu.Lock()
+	dbInstance = nil
+	mu.Unlock()
+
+	srv := New(ctx, testConfig)
+	defer func() {
+		srv.Close()
+		mu.Lock()
+		dbInstance = nil
+		mu.Unlock()
+	}()
+
+	pool := srv.Pool()
+	assert.NotNil(t, pool, "Expected pool to not be nil")
+
+	err := pool.Ping(ctx)
+	assert.NoError(t, err, "Expected pool to be able to ping database")
 }

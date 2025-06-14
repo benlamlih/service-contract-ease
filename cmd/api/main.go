@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/joho/godotenv"
 	"log"
 	"log/slog"
 	"net/http"
@@ -14,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/joho/godotenv"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
@@ -131,7 +131,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer tp.Shutdown(ctx)
+	defer func() {
+		if err := tp.Shutdown(ctx); err != nil {
+			log.Printf("Error shutting down tracer provider: %v", err)
+		}
+	}()
 
 	// Configure structured JSON logging
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
@@ -139,17 +143,16 @@ func main() {
 		AddSource: true,
 	}))
 	slog.SetDefault(logger)
-
-	server := server.NewServer(ctx, tp)
+	httpServer := server.BuildHTTPServer(ctx, tp)
 
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool, 1)
 
 	// Run graceful shutdown in a separate goroutine
-	go gracefulShutdown(server, done)
+	go gracefulShutdown(httpServer, done)
 
-	slog.Info("Listening on HTTP server", "addr", server.Addr)
-	if err = server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	slog.Info("Listening on HTTP server", "addr", httpServer.Addr)
+	if err = httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		panic(fmt.Sprintf("http server error: %s", err))
 	}
 

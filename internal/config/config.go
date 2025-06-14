@@ -1,8 +1,10 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/knadh/koanf/parsers/yaml"
@@ -35,8 +37,12 @@ func LoadConfig() *Config {
 	if val := os.Getenv("APP_ENV"); val != "" {
 		envFile = val
 	}
+	projectRoot, err := findProjectRoot()
+	if err != nil {
+		log.Fatalf("could not find project root: %v", err)
+	}
 
-	configFile := "config." + envFile + ".yaml"
+	configFile := filepath.Join(projectRoot, fmt.Sprintf("config.%s.yaml", envFile))
 	if err := k.Load(file.Provider(configFile), yaml.Parser()); err != nil {
 		log.Fatalf("error loading config.dev.yaml: %v", err)
 	}
@@ -53,4 +59,21 @@ func LoadConfig() *Config {
 	}
 
 	return &cfg
+}
+
+func findProjectRoot() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir, nil
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return "", fmt.Errorf("project root not found")
+		}
+		dir = parent
+	}
 }

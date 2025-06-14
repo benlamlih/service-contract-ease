@@ -1,14 +1,6 @@
 package server
 
 import (
-	"context"
-	"fmt"
-	"go.opentelemetry.io/otel/trace"
-	"net/http"
-	"strconv"
-	"time"
-
-	"contract_ease/internal/config"
 	"contract_ease/internal/database"
 )
 
@@ -17,21 +9,6 @@ type Server struct {
 	db   database.Service
 }
 
-func NewServer(ctx context.Context, tp trace.TracerProvider) *http.Server {
-	cfg := config.LoadConfig()
-
-	port, _ := strconv.Atoi(cfg.App.Port)
-
-	s := &Server{
-		port: port,
-		db:   database.New(ctx, cfg),
-	}
-
-	return &http.Server{
-		Addr:         fmt.Sprintf(":%d", s.port),
-		Handler:      s.RegisterRoutes(tp),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
-	}
+func NewServer(db database.Service, port int) *Server {
+	return &Server{db: db, port: port}
 }

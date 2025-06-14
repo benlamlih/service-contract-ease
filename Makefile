@@ -72,9 +72,10 @@ migrate-down:
 		-path ./migrations down
 
 build-openapi:
-	# Create build directory if it doesn't exist
 	mkdir -p docs/build
-	# Bundle the OpenAPI spec
 	npx @redocly/cli bundle docs/openapi/openapi.yaml --output docs/build/openapi.yaml
-	# Lint the bundled spec
 	npx @redocly/cli lint docs/build/openapi.yaml --skip-rule=no-empty-servers --skip-rule=no-server-example.com
+
+mocks:
+	@echo "Generating mocks..."
+	@mockery --config .mockery.yaml

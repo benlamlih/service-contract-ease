@@ -16,7 +16,7 @@ get:
             properties:
               status:
                 type: string
-                example: ok
+                example: up
     '401':
       description: Unauthorized
       content:

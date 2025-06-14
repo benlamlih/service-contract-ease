@@ -1,0 +1,18 @@
+all: false
+force-file-write: true
+formatter: goimports
+log-level: info
+recursive: true
+require-template-schema-exists: false
+template: testify
+
+packages:
+  contract_ease/internal/database:
+    config:
+      all: true
+      recursive: false
+      force-file-write: true
+      dir: '{{.InterfaceDir}}/mocks'
+      pkgname: 'mocks'
+      structname: "{{ .InterfaceName | firstUpper }}"
+      filename: "{{ .InterfaceName | snakecase }}.go"
