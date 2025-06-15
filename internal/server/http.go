@@ -20,9 +20,9 @@ func BuildHTTPServer(ctx context.Context, tp trace.TracerProvider) *http.Server 
 
 	zitadel := NewZitadelClient(
 		cfg.Zitadel.Issuer,
-		cfg.Zitadel.ClientID,
-		cfg.Zitadel.ClientSecret,
-		cfg.Zitadel.PAT,
+		cfg.Zitadel.Client.ID,
+		cfg.Zitadel.Client.Secret,
+		cfg.Zitadel.Service.Pat,
 	)
 
 	app := NewServer(db, port, zitadel)

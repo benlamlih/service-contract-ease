@@ -1,26 +1,26 @@
 services:
-  app:
-    build:
-      context: .
-    container_name: service_contract_ease
-    restart: unless-stopped
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-      - openobserve
-    environment:
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_PORT=${DB_PORT}
-    working_dir: /app
-    command: [ "./main" ]
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+#  app:
+#    build:
+#      context: .
+#    container_name: service_contract_ease
+#    restart: unless-stopped
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - postgres
+#      - openobserve
+#    environment:
+#      - DB_NAME=${DB_NAME}
+#      - DB_USER=${DB_USER}
+#      - DB_PASSWORD=${DB_PASSWORD}
+#      - DB_PORT=${DB_PORT}
+#    working_dir: /app
+#    command: [ "./main" ]
+#    logging:
+#      driver: "json-file"
+#      options:
+#        max-size: "10m"
+#        max-file: "3"
   postgres:
     image: postgres:17-alpine
     container_name: contract_ease_postgres
@@ -31,42 +31,42 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-  openobserve:
-    image: public.ecr.aws/zinclabs/openobserve:latest
-    container_name: openobserve
-    restart: unless-stopped
-    ports:
-      - "5080:5080"      # UI + HTTP/OTLP/Logs
-      - "4317:4317"      # OTLP gRPC (traces, metrics, logs)
-    environment:
-      ZO_ROOT_USER_EMAIL: admin@example.com
-      ZO_ROOT_USER_PASSWORD: supersecret
-      ZO_CREATE_ROOT_USER: "true"
-      ZO_CREATE_DEFAULT_ORG: "true"
-      ZO_CREATE_DEFAULT_STREAM: "true"
-      ZO_HTTP_WRITE_ENABLE: "true"     # Enable HTTP write endpoint
-      ZO_OTLP_HTTP_ENABLE: "true"      # Enable OTLP over HTTP
-      ZO_OTLP_GRPC_ENABLE: "true"      # Enable OTLP over gRPC
-    volumes:
-      - openobserve_data:/data
-  vector:
-    image: timberio/vector:latest-alpine
-    container_name: vector
-    restart: unless-stopped
-    user: root
-    environment:
-      - VECTOR_CONFIG=/etc/vector/vector.toml
-      - VECTOR_WATCH_CONFIG=true
-    ports:
-      - "8686:8686"
-    volumes:
-      - ./vector.toml:/etc/vector/vector.toml:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-    depends_on:
-      - openobserve
-volumes:
-  postgres_data:
-  openobserve_data:
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
+#  openobserve:
+#    image: public.ecr.aws/zinclabs/openobserve:latest
+#    container_name: openobserve
+#    restart: unless-stopped
+#    ports:
+#      - "5080:5080"      # UI + HTTP/OTLP/Logs
+#      - "4317:4317"      # OTLP gRPC (traces, metrics, logs)
+#    environment:
+#      ZO_ROOT_USER_EMAIL: admin@example.com
+#      ZO_ROOT_USER_PASSWORD: supersecret
+#      ZO_CREATE_ROOT_USER: "true"
+#      ZO_CREATE_DEFAULT_ORG: "true"
+#      ZO_CREATE_DEFAULT_STREAM: "true"
+#      ZO_HTTP_WRITE_ENABLE: "true"     # Enable HTTP write endpoint
+#      ZO_OTLP_HTTP_ENABLE: "true"      # Enable OTLP over HTTP
+#      ZO_OTLP_GRPC_ENABLE: "true"      # Enable OTLP over gRPC
+#    volumes:
+#      - openobserve_data:/data
+#  vector:
+#    image: timberio/vector:latest-alpine
+#    container_name: vector
+#    restart: unless-stopped
+#    user: root
+#    environment:
+#      - VECTOR_CONFIG=/etc/vector/vector.toml
+#      - VECTOR_WATCH_CONFIG=true
+#    ports:
+#      - "8686:8686"
+#    volumes:
+#      - ./vector.toml:/etc/vector/vector.toml:ro
+#      - /var/run/docker.sock:/var/run/docker.sock:ro
+#      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+#    depends_on:
+#      - openobserve
+#volumes:
+#  postgres_data:
+#  openobserve_data:

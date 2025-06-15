@@ -74,9 +74,18 @@ func (s *Server) signUpHandler(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&userRequest); err != nil {
+		slog.Error("failed to bind signup request",
+			"error", err,
+			"path", "/api/auth/sign-up")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid userRequest data"})
 		return
 	}
+
+	slog.Info("processing signup request",
+		"email", userRequest.Email,
+		"firstName", userRequest.FirstName,
+		"lastName", userRequest.LastName,
+		"role", userRequest.Role)
 
 	username := domain.GenerateUsername(userRequest.FirstName, userRequest.LastName)
 	params := domain.CreateUserParams{
@@ -89,13 +98,17 @@ func (s *Server) signUpHandler(c *gin.Context) {
 
 	zitadelUserID, err := s.ZitadelClient.CreateUser(c, params)
 	if err != nil {
-		slog.Error("zitadel user creation failed", "error", err)
+		slog.Error("zitadel user creation failed",
+			"error", err,
+			"email", userRequest.Email,
+			"username", username)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user in authentication service"})
+		return
 	}
 
-	token, err := s.ZitadelClient.AuthenticateROPC(c, params.Email, params.Password)
-	if err != nil {
-		slog.Error("zitadel login failed", "error", err)
-	}
+	slog.Info("zitadel user created successfully",
+		"zitadelUserId", zitadelUserID,
+		"email", userRequest.Email)
 
 	err = s.store.CreateUser(c, repository.CreateUserParams{
 		ZitadelID: zitadelUserID,
@@ -105,8 +118,20 @@ func (s *Server) signUpHandler(c *gin.Context) {
 		Email:     userRequest.Email,
 	})
 	if err != nil {
+		slog.Error("local user creation failed",
+			"error", err,
+			"email", userRequest.Email,
+			"zitadelUserId", zitadelUserID)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user in local database"})
 		return
 	}
-	slog.Info("Sign-up endpoint")
-	c.IndentedJSON(http.StatusCreated, token)
+
+	slog.Info("user signup completed successfully",
+		"userId", zitadelUserID,
+		"email", userRequest.Email,
+		"username", username)
+
+	c.IndentedJSON(http.StatusCreated, gin.H{
+		"userId": zitadelUserID,
+	})
 }

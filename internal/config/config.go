@@ -30,10 +30,14 @@ type Config struct {
 	} `koanf:"db"`
 
 	Zitadel struct {
-		Issuer       string `koanf:"issuer"`
-		ClientID     string `koanf:"client_id"`
-		ClientSecret string `koanf:"client_secret"`
-		PAT          string `koanf:"pat"`
+		Issuer string `koanf:"issuer"`
+		Client struct {
+			ID     string `koanf:"id"`
+			Secret string `koanf:"secret"`
+		} `koanf:"client"`
+		Service struct {
+			Pat string `koanf:"pat"`
+		} `koanf:"service"`
 	} `koanf:"zitadel"`
 }
 

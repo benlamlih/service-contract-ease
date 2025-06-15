@@ -7,7 +7,6 @@ package repository
 
 import (
 	"context"
-	"time"
 )
 
 const createUser = `-- name: CreateUser :exec
@@ -15,18 +14,16 @@ INSERT INTO users (zitadel_id,
                    first_name,
                    last_name,
                    username,
-                   email,
-                   created_at)
-VALUES ($1, $2, $3, $4, $5, $6)
+                   email)
+VALUES ($1, $2, $3, $4, $5)
 `
 
 type CreateUserParams struct {
-	ZitadelID string     `json:"zitadel_id"`
-	FirstName *string    `json:"first_name"`
-	LastName  *string    `json:"last_name"`
-	Username  *string    `json:"username"`
-	Email     string     `json:"email"`
-	CreatedAt *time.Time `json:"created_at"`
+	ZitadelID string  `json:"zitadelId"`
+	FirstName *string `json:"firstName"`
+	LastName  *string `json:"lastName"`
+	Username  *string `json:"username"`
+	Email     string  `json:"email"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
@@ -36,7 +33,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 		arg.LastName,
 		arg.Username,
 		arg.Email,
-		arg.CreatedAt,
 	)
 	return err
 }

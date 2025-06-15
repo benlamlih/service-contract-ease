@@ -12,75 +12,75 @@ import (
 
 type Client struct {
 	ID          uuid.UUID  `json:"id"`
-	WorkspaceID *uuid.UUID `json:"workspace_id"`
+	WorkspaceID *uuid.UUID `json:"workspaceId"`
 	Name        *string    `json:"name"`
 	Email       *string    `json:"email"`
 	Company     *string    `json:"company"`
-	CreatedAt   *time.Time `json:"created_at"`
+	CreatedAt   *time.Time `json:"createdAt"`
 }
 
 type Contract struct {
 	ID           uuid.UUID  `json:"id"`
-	WorkspaceID  *uuid.UUID `json:"workspace_id"`
-	ClientID     *uuid.UUID `json:"client_id"`
-	CreatedBy    *uuid.UUID `json:"created_by"`
+	WorkspaceID  *uuid.UUID `json:"workspaceId"`
+	ClientID     *uuid.UUID `json:"clientId"`
+	CreatedBy    *uuid.UUID `json:"createdBy"`
 	Title        string     `json:"title"`
 	Content      *string    `json:"content"`
 	Status       int16      `json:"status"`
 	Version      *int32     `json:"version"`
-	SentAt       *time.Time `json:"sent_at"`
-	DraftPdfUrl  *string    `json:"draft_pdf_url"`
-	SignedPdfUrl *string    `json:"signed_pdf_url"`
-	CreatedAt    *time.Time `json:"created_at"`
-	UpdatedAt    *time.Time `json:"updated_at"`
-	DeletedAt    *time.Time `json:"deleted_at"`
+	SentAt       *time.Time `json:"sentAt"`
+	DraftPdfUrl  *string    `json:"draftPdfUrl"`
+	SignedPdfUrl *string    `json:"signedPdfUrl"`
+	CreatedAt    *time.Time `json:"createdAt"`
+	UpdatedAt    *time.Time `json:"updatedAt"`
+	DeletedAt    *time.Time `json:"deletedAt"`
 }
 
 type ContractSigningLink struct {
 	ID         uuid.UUID  `json:"id"`
-	ContractID *uuid.UUID `json:"contract_id"`
-	ClientID   *uuid.UUID `json:"client_id"`
+	ContractID *uuid.UUID `json:"contractId"`
+	ClientID   *uuid.UUID `json:"clientId"`
 	Token      string     `json:"token"`
 	Status     int16      `json:"status"`
-	CreatedAt  *time.Time `json:"created_at"`
-	ExpiresAt  *time.Time `json:"expires_at"`
-	OpenedAt   *time.Time `json:"opened_at"`
-	SignedAt   *time.Time `json:"signed_at"`
+	CreatedAt  *time.Time `json:"createdAt"`
+	ExpiresAt  *time.Time `json:"expiresAt"`
+	OpenedAt   *time.Time `json:"openedAt"`
+	SignedAt   *time.Time `json:"signedAt"`
 }
 
 type Signature struct {
 	ID            uuid.UUID  `json:"id"`
-	ContractID    *uuid.UUID `json:"contract_id"`
-	ClientID      *uuid.UUID `json:"client_id"`
-	SignerName    *string    `json:"signer_name"`
-	SignerEmail   *string    `json:"signer_email"`
-	SignedAt      *time.Time `json:"signed_at"`
-	IpAddress     *string    `json:"ip_address"`
-	UserAgent     *string    `json:"user_agent"`
+	ContractID    *uuid.UUID `json:"contractId"`
+	ClientID      *uuid.UUID `json:"clientId"`
+	SignerName    *string    `json:"signerName"`
+	SignerEmail   *string    `json:"signerEmail"`
+	SignedAt      *time.Time `json:"signedAt"`
+	IpAddress     *string    `json:"ipAddress"`
+	UserAgent     *string    `json:"userAgent"`
 	Method        *int16     `json:"method"`
-	SignatureData *string    `json:"signature_data"`
+	SignatureData *string    `json:"signatureData"`
 	Consent       bool       `json:"consent"`
 }
 
 type User struct {
 	ID        uuid.UUID  `json:"id"`
-	ZitadelID string     `json:"zitadel_id"`
-	FirstName *string    `json:"first_name"`
-	LastName  *string    `json:"last_name"`
+	ZitadelID string     `json:"zitadelId"`
+	FirstName *string    `json:"firstName"`
+	LastName  *string    `json:"lastName"`
 	Username  *string    `json:"username"`
 	Email     string     `json:"email"`
-	CreatedAt *time.Time `json:"created_at"`
+	CreatedAt *time.Time `json:"createdAt"`
 }
 
 type Workspace struct {
 	ID        uuid.UUID  `json:"id"`
 	Name      string     `json:"name"`
-	OwnerID   *uuid.UUID `json:"owner_id"`
-	CreatedAt *time.Time `json:"created_at"`
+	OwnerID   *uuid.UUID `json:"ownerId"`
+	CreatedAt *time.Time `json:"createdAt"`
 }
 
 type WorkspaceMember struct {
-	UserID      uuid.UUID `json:"user_id"`
-	WorkspaceID uuid.UUID `json:"workspace_id"`
+	UserID      uuid.UUID `json:"userId"`
+	WorkspaceID uuid.UUID `json:"workspaceId"`
 	Role        int16     `json:"role"`
 }

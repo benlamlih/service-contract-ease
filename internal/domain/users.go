@@ -23,5 +23,5 @@ func GenerateUsername(firstName, lastName string) string {
 		suffix = []byte{1, 2, 3}
 	}
 
-	return fmt.Sprintf("%s.%s%05d", first, last, int(suffix[0])<<16|int(suffix[1])<<8|int(suffix[2]))
+	return fmt.Sprintf("%s_%s%05d", first, last, int(suffix[0])<<16|int(suffix[1])<<8|int(suffix[2]))
 }

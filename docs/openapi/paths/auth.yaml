@@ -1,0 +1,37 @@
+post:
+  summary: Create a new user account
+  description: Register a new user with the system. Creates both a local user and a Zitadel user.
+  operationId: signUp
+  tags:
+    - Authentication
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/SignUpRequest.yaml'
+  responses:
+    '201':
+      description: User successfully created
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/SignUpResponse.yaml'
+    '400':
+      description: Invalid request data
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Error.yaml'
+    '409':
+      description: User already exists
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Error.yaml'
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Error.yaml' 
