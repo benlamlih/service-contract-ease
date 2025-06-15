@@ -19,6 +19,10 @@ components:
       $ref: './schemas/Error.yaml'
     User:
       $ref: './schemas/User.yaml'
+    SignUpRequest:
+      $ref: './schemas/SignUpRequest.yaml'
+    SignUpResponse:
+      $ref: './schemas/SignUpResponse.yaml'
   securitySchemes:
     bearerAuth:
       type: http
@@ -64,4 +68,6 @@ paths:
                 $ref: './schemas/Error.yaml'
   /api/me:
     $ref: './paths/me.yaml'
+  /api/auth/sign-up:
+    $ref: './paths/auth.yaml'
 

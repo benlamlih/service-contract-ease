@@ -1,0 +1,26 @@
+type: object
+required:
+  - email
+  - firstName
+  - lastName
+  - password
+  - role
+properties:
+  email:
+    type: string
+    format: email
+    example: "user@example.com"
+  firstName:
+    type: string
+    example: "John"
+  lastName:
+    type: string
+    example: "Doe"
+  password:
+    type: string
+    format: password
+    example: "strongPassword123"
+  role:
+    type: string
+    enum: [owner, member]
+    example: "owner" 

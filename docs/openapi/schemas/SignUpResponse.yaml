@@ -1,0 +1,8 @@
+type: object
+required:
+  - userId
+properties:
+  userId:
+    type: string
+    example: "324645931335070561"
+    description: "The unique identifier of the created user" 

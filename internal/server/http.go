@@ -18,7 +18,14 @@ func BuildHTTPServer(ctx context.Context, tp trace.TracerProvider) *http.Server 
 	port, _ := strconv.Atoi(cfg.App.Port)
 	db := database.New(ctx, cfg)
 
-	app := NewServer(db, port)
+	zitadel := NewZitadelClient(
+		cfg.Zitadel.Issuer,
+		cfg.Zitadel.Client.ID,
+		cfg.Zitadel.Client.Secret,
+		cfg.Zitadel.Service.Pat,
+	)
+
+	app := NewServer(db, port, zitadel)
 
 	return &http.Server{
 		Addr:         fmt.Sprintf(":%d", port),

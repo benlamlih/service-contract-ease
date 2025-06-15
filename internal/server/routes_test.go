@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/mock"
 
 	"contract_ease/internal/database/mocks"
@@ -14,9 +15,12 @@ import (
 func TestHelloWorldHandler(t *testing.T) {
 	t.Parallel()
 	mockDB := mocks.NewService(t)
+	mockPool := &pgxpool.Pool{}
+
+	mockDB.On("Pool").Return(mockPool)
 	mockDB.On("Health", mock.Anything).Return(map[string]string{"status": "up"})
 
-	s := NewServer(mockDB, 8080)
+	s := NewServer(mockDB, 8080, ZitadelClient{})
 	r := gin.New()
 	r.GET("/api/health", s.healthHandler)
 	req, err := http.NewRequest("GET", "/api/health", nil)
